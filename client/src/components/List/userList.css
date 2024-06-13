@@ -1,0 +1,10 @@
+.list-container {
+  flex: 1;
+  padding: 1rem;
+  overflow: scroll;
+}
+
+.list-container::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
