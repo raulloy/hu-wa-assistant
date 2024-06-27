@@ -67,7 +67,7 @@ const Detail = ({ selectedUser }) => {
 
   return (
     <div className="detail-container">
-      <Card sx={{ maxWidth: 345, backgroundColor: 'transparent' }}>
+      <Card sx={{ backgroundColor: 'transparent' }}>
         <CardHeader
           action={
             <IconButton aria-label="settings">

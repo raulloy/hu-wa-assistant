@@ -2,9 +2,23 @@
   flex: 1;
   padding: 1rem;
   overflow: scroll;
+  max-width: 260px;
+  box-sizing: border-box;
 }
 
 .list-container::-webkit-scrollbar {
   width: 0;
   height: 0;
 }
+
+@media (max-width: 1200px) {
+  .list-container {
+    height: 10rem;
+    width: 100%;
+    max-width: none;
+  }
+}
+
+/* @media (min-width: 30em) and (max-width: 50em) {
+
+} */

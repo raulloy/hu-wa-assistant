@@ -22,6 +22,7 @@ const socket = io(apiURL);
 
 const UserList = ({ onSelectUser }) => {
   const [users, setUsers] = useState([]);
+  const [selectedUserId, setSelectedUserId] = useState(null);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -52,6 +53,18 @@ const UserList = ({ onSelectUser }) => {
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
           user.userId === data.userId
+            ? { ...user, hasUnseenAIResponse: true }
+            : user
+        )
+      );
+    });
+
+    // Listen for markSeen event
+    socket.on('markSeen', (data) => {
+      console.log(`Received markSeen for userId: ${data.userId}`);
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user.userId === data.userId
             ? { ...user, hasUnseenAIResponse: false }
             : user
         )
@@ -61,11 +74,11 @@ const UserList = ({ onSelectUser }) => {
     return () => {
       socket.disconnect();
     };
-  }, [users]);
+  }, []);
 
   return (
     <div className="list-container">
-      <Card sx={{ maxWidth: 345, backgroundColor: 'transparent' }}>
+      <Card sx={{ backgroundColor: 'transparent' }}>
         <CardHeader
           avatar={<Avatar sx={{ bgcolor: blue[500] }}>HU</Avatar>}
           action={
@@ -85,7 +98,18 @@ const UserList = ({ onSelectUser }) => {
               {users.map((user) => (
                 <div key={user._id}>
                   <ListItem disablePadding>
-                    <ListItemButton onClick={() => onSelectUser(user)}>
+                    <ListItemButton
+                      onClick={() => {
+                        onSelectUser(user);
+                        setSelectedUserId(user.userId); // Update selected user ID on click
+                      }}
+                      sx={{
+                        bgcolor:
+                          selectedUserId === user.userId
+                            ? '#DCDBDB'
+                            : 'transparent', // Conditional background color
+                      }}
+                    >
                       <ListItemIcon>
                         <Badge
                           color="primary"

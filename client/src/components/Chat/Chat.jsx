@@ -20,6 +20,7 @@ const Chat = ({ selectedUser }) => {
   const [userId, setUserId] = useState('');
   const [threadId, setThreadId] = useState('');
   const [mode, setMode] = useState();
+  const [isUserSelected, setIsUserSelected] = useState(false);
 
   useEffect(() => {
     socket = io(ENDPOINT);
@@ -36,10 +37,20 @@ const Chat = ({ selectedUser }) => {
       }
     });
 
+    // Listen for AI responses from the backend
+    socket.on('aiResponse', (data) => {
+      if (data.threadId === threadId && data.response) {
+        setMessages((prevMessages) => [...prevMessages]);
+        if (mode === 'assisted') {
+          setMessage(data.response);
+        }
+      }
+    });
+
     return () => {
       socket.disconnect();
     };
-  }, [threadId]);
+  }, [threadId, mode]);
 
   useEffect(() => {
     const fetchThreadData = async () => {
@@ -55,12 +66,17 @@ const Chat = ({ selectedUser }) => {
         );
         const thread = await response.json();
         setMode(thread.mode);
+        setIsUserSelected(true);
       } catch (error) {
         console.error('Error fetching thread:', error);
       }
     };
 
-    fetchThreadData();
+    if (selectedUser) {
+      fetchThreadData();
+    } else {
+      setIsUserSelected(false);
+    }
   }, [selectedUser]);
 
   useEffect(() => {
@@ -83,7 +99,7 @@ const Chat = ({ selectedUser }) => {
           console.error('Error fetching messages:', error);
         }
 
-        if (mode === 'automatic') {
+        if (mode === 'automatic' && !isUserSelected) {
           // Mark AI responses as seen
           await fetch(`${apiURL}/api/wa/mark-seen`, {
             method: 'POST',
@@ -97,7 +113,7 @@ const Chat = ({ selectedUser }) => {
     };
 
     fetchMessagesAndMarkSeen();
-  }, [selectedUser, mode, threadId]);
+  }, [selectedUser, mode, threadId, isUserSelected]);
 
   const toggleMode = async () => {
     try {
@@ -127,7 +143,7 @@ const Chat = ({ selectedUser }) => {
     if (event) event.preventDefault();
 
     if (message && userId) {
-      console.log(`Sending message to: ${userId}, message: ${message}`);
+      // console.log(`Sending message to: ${userId}, message: ${message}`);
 
       const response = await fetch(`${apiURL}/api/wa/send`, {
         method: 'POST',
@@ -138,7 +154,7 @@ const Chat = ({ selectedUser }) => {
       });
 
       if (response.ok) {
-        console.log('Response sent to user via WhatsApp');
+        // console.log('Response sent to user via WhatsApp');
         const newMessage = {
           message,
           userId: name,
