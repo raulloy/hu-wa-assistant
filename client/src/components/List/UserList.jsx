@@ -71,6 +71,11 @@ const UserList = ({ onSelectUser }) => {
       );
     });
 
+    // Listen for userMessage event
+    socket.on('userMessage', (data) => {
+      fetchUsers();
+    });
+
     return () => {
       socket.disconnect();
     };
